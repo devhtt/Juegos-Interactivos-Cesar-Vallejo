@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Bosque Fonológico — Mi Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#4E9F63; --primary-dark:#2F6B44; --leaf:#9BD6A4;
+  --sun:#FFC145; --coral:#FF6F5E; --sky:#8ECDDD;
+  --bg:#FBF6EA; --bg-card:#FFFDF7; --ink:#33402F; --ink-soft:#6B7563;
+  --shadow:rgba(47,60,38,.18);
+  --font-display:'Baloo 2','Trebuchet MS',sans-serif;
+  --font-body:'Quicksand','Trebuchet MS',sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;min-height:100%;background:var(--bg);color:var(--ink);font-family:var(--font-body);}
+body{
+  background-image:
+    radial-gradient(circle at 10% 0%, rgba(155,214,164,.35), transparent 40%),
+    radial-gradient(circle at 100% 100%, rgba(142,205,221,.25), transparent 45%);
+  min-height:100vh; padding-bottom:40px;
+}
+h1,h2,h3,.fd{font-family:var(--font-display); color:var(--primary-dark); margin:0;}
+p{line-height:1.5;color:var(--ink-soft);margin:0;}
+button{font-family:var(--font-body);}
+
+/* ---------- barra superior ---------- */
+.top-bar{display:flex;align-items:center;justify-content:center;gap:10px;padding:16px 20px 4px;}
+.top-bar h1{font-size:22px;}
+
+/* ---------- tarjeta de perfil ---------- */
+.profile-card{
+  max-width:520px;margin:16px auto 0;background:var(--bg-card);border-radius:26px;
+  box-shadow:0 12px 26px var(--shadow); padding:18px 20px; display:flex; align-items:center; gap:16px;
+}
+.profile-avatar{
+  width:64px;height:64px;border-radius:50%;background:var(--leaf);
+  display:flex;align-items:center;justify-content:center;font-size:34px;flex:none;
+  box-shadow:inset 0 -4px 0 rgba(0,0,0,.08);
+}
+.profile-info{flex:1;min-width:0;}
+.profile-info .name{font-family:var(--font-display);font-weight:700;font-size:19px;color:var(--primary-dark);}
+.profile-info .sub{font-size:13px;color:var(--ink-soft);}
+.profile-stars{font-size:14px;font-weight:700;color:var(--primary-dark);font-family:var(--font-display);margin-top:2px;}
+.edit-btn{
+  flex:none;width:40px;height:40px;border-radius:50%;border:none;background:var(--sun);
+  font-size:17px;cursor:pointer;box-shadow:0 4px 10px var(--shadow);
+}
+.edit-btn:hover{transform:translateY(-2px);}
+.edit-btn:focus-visible{outline:3px solid var(--primary);outline-offset:2px;}
+
+/* ---------- grid de juegos ---------- */
+.game-grid{
+  max-width:920px;margin:0 auto;padding:22px 20px 10px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;
+}
+.game-card{
+  background:var(--bg-card);border-radius:24px;box-shadow:0 12px 26px var(--shadow);
+  padding:20px 18px;display:flex;flex-direction:column;gap:8px;border:none;cursor:pointer;
+  text-align:left;color:var(--ink);transition:transform .15s ease,box-shadow .15s ease;
+}
+.game-card:hover{transform:translateY(-4px);box-shadow:0 18px 34px var(--shadow);}
+.game-card:focus-visible{outline:3px solid var(--sun);outline-offset:2px;}
+.game-emoji{font-size:38px;}
+.game-card h2{font-size:18px;}
+.game-card .desc{font-size:13px;}
+.game-stars{margin-top:auto;font-size:16px;letter-spacing:2px;}
+.game-plays{font-size:11.5px;color:var(--ink-soft);}
+
+/* ---------- botones genéricos ---------- */
+.btn{
+  font-family:var(--font-display);font-weight:700;font-size:16px;color:#fff;background:var(--primary);
+  border:none;border-radius:100px;padding:13px 26px;cursor:pointer;
+  box-shadow:0 6px 0 var(--primary-dark),0 10px 18px var(--shadow);
+  transition:transform .12s ease,box-shadow .12s ease;
+}
+.btn:hover{transform:translateY(-2px);}
+.btn:active{transform:translateY(2px);box-shadow:0 3px 0 var(--primary-dark),0 6px 10px var(--shadow);}
+.btn:focus-visible{outline:3px solid var(--sun);outline-offset:3px;}
+.btn.secondary{background:var(--sun);box-shadow:0 6px 0 #C98F1F,0 10px 18px var(--shadow);}
+.btn.secondary:active{box-shadow:0 3px 0 #C98F1F,0 6px 10px var(--shadow);}
+.btn.outline{background:transparent;color:var(--primary-dark);box-shadow:none;border:2px solid var(--primary);}
+.btn.outline:hover{background:rgba(78,159,99,.1);}
+
+/* ---------- modal genérico ---------- */
+.modal-veil{
+  position:fixed;inset:0;background:rgba(51,64,47,.45);display:flex;align-items:center;justify-content:center;
+  padding:20px;z-index:60;
+}
+.modal-veil[hidden]{display:none;}
+.modal-card{
+  background:var(--bg-card);border-radius:26px;padding:26px 24px;max-width:380px;width:100%;
+  box-shadow:0 20px 44px var(--shadow); max-height:90vh; overflow:auto;
+}
+.modal-card h2{font-size:20px;margin-bottom:14px;text-align:center;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:13px;font-weight:700;color:var(--primary-dark);margin-bottom:6px;font-family:var(--font-display);}
+.field input[type=text], .field select{
+  width:100%;padding:10px 14px;border-radius:14px;border:2px solid var(--leaf);
+  font-family:var(--font-body);font-size:15px;background:#fff;color:var(--ink);
+}
+.field input[type=text]:focus, .field select:focus{outline:none;border-color:var(--primary);}
+.avatar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.avatar-opt{
+  aspect-ratio:1;border-radius:14px;border:2px solid transparent;background:#fff;font-size:24px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+}
+.avatar-opt.selected{border-color:var(--primary);background:var(--leaf);}
+.avatar-opt:focus-visible{outline:2px solid var(--sun);}
+.modal-actions{display:flex;gap:10px;margin-top:6px;}
+.modal-actions .btn{flex:1;}
+.reset-link{
+  display:block;text-align:center;margin-top:16px;font-size:12.5px;color:var(--ink-soft);
+  background:none;border:none;cursor:pointer;text-decoration:underline;
+}
+
+/* ---------- pantalla de juego (full screen) ---------- */
+.game-screen{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;flex-direction:column;}
+.game-screen[hidden]{display:none;}
+.game-topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;gap:10px;}
+.back-btn{
+  border:none;background:var(--bg-card);color:var(--primary-dark);font-family:var(--font-display);
+  font-weight:700;font-size:14px;padding:9px 16px;border-radius:100px;cursor:pointer;box-shadow:0 4px 10px var(--shadow);
+}
+.game-hud{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+.hud-chip{
+  background:rgba(255,253,247,.9);border-radius:100px;padding:6px 14px;box-shadow:0 4px 10px var(--shadow);
+  font-family:var(--font-display);font-weight:700;font-size:15px;
+}
+.game-body{flex:1;position:relative;overflow:hidden;padding:0 16px 16px;display:flex;flex-direction:column;}
+
+/* ---------- resultado de juego ---------- */
+.result-wrap{flex:1;display:flex;align-items:center;justify-content:center;}
+.result-card{background:var(--bg-card);border-radius:26px;padding:28px 26px;max-width:360px;width:100%;text-align:center;box-shadow:0 18px 40px var(--shadow);}
+.result-emoji{font-size:48px;}
+.result-stars{font-size:30px;letter-spacing:6px;margin:10px 0;}
+.result-actions{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+
+/* ================= JUEGO 1: Atrapa el Sonido ================= */
+.g1-target{
+  align-self:center;background:rgba(255,253,247,.9);border-radius:100px;padding:8px 24px;
+  box-shadow:0 4px 12px var(--shadow);text-align:center;margin-bottom:8px;
+}
+.g1-target .letter{font-family:var(--font-display);font-size:26px;color:var(--primary);display:block;}
+.g1-target .example{font-size:12px;font-weight:600;color:var(--primary-dark);}
+.g1-area{position:relative;flex:1;border-radius:20px;overflow:hidden;background:linear-gradient(180deg, rgba(142,205,221,.15), rgba(155,214,164,.2));}
+.g1-item{
+  position:absolute;top:-70px;width:60px;height:60px;border-radius:50%;border:none;background:rgba(255,255,255,.9);
+  box-shadow:0 6px 14px var(--shadow);font-size:30px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;animation-name:g1fall;animation-timing-function:linear;animation-fill-mode:forwards;
+}
+.g1-item.good{animation:none!important;pointer-events:none;transform:scale(1.5);opacity:0;transition:.35s ease;}
+.g1-item.bad{animation:none!important;pointer-events:none;transform:scale(.6) rotate(20deg);opacity:0;transition:.35s ease;}
+@keyframes g1fall{from{top:-70px;}to{top:100%;}}
+.float-pts{position:absolute;font-family:var(--font-display);font-weight:800;font-size:18px;pointer-events:none;animation:floatup .8s ease forwards;}
+.float-pts.good{color:var(--primary);} .float-pts.bad{color:var(--coral);}
+@keyframes floatup{from{transform:translateY(0);opacity:1;}to{transform:translateY(-36px);opacity:0;}}
+
+/* ================= JUEGO 2: Memoria de Sonidos ================= */
+.g2-grid{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-content:center;max-width:480px;margin:0 auto;width:100%;}
+.g2-card{aspect-ratio:1;border-radius:16px;border:none;cursor:pointer;background:var(--primary);box-shadow:0 6px 14px var(--shadow);
+  display:flex;align-items:center;justify-content:center;font-size:0;position:relative;perspective:600px;}
+.g2-card .face{position:absolute;inset:0;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  font-size:28px;backface-visibility:hidden;transition:transform .3s ease;}
+.g2-card .back{background:var(--primary);color:#fff;font-size:22px;}
+.g2-card .front{background:#fff;transform:rotateY(180deg);}
+.g2-card.flipped .back{transform:rotateY(180deg);}
+.g2-card.flipped .front{transform:rotateY(0deg);}
+.g2-card.matched{opacity:.35;pointer-events:none;}
+
+/* ================= JUEGO 3: Cuál Escuchaste ================= */
+.g3-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;}
+.g3-listen-btn{
+  border:none;background:var(--sky);width:84px;height:84px;border-radius:50%;font-size:36px;cursor:pointer;
+  box-shadow:0 6px 16px var(--shadow); animation:g3pulse 2s ease-in-out infinite;
+}
+@keyframes g3pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.06);}}
+.g3-options{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:420px;}
+.g3-opt{
+  aspect-ratio:1;border-radius:20px;border:none;background:var(--bg-card);box-shadow:0 6px 14px var(--shadow);
+  font-size:40px;cursor:pointer;
+}
+.g3-opt:focus-visible{outline:3px solid var(--sun);}
+.g3-opt.correct{background:var(--leaf);}
+.g3-opt.wrong{background:#FFD6D0;}
+
+/* ================= JUEGO 4: Sílabas Saltarinas ================= */
+.g4-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;}
+.g4-emoji{font-size:56px;}
+.g4-slots{display:flex;gap:10px;}
+.g4-slot{
+  min-width:64px;height:52px;border-radius:14px;border:3px dashed var(--leaf);background:rgba(255,255,255,.6);
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;
+  font-size:18px;color:var(--primary-dark);padding:0 10px;
+}
+.g4-chips{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:380px;}
+.g4-chip{
+  border:none;background:var(--sun);color:#5a3d05;font-family:var(--font-display);font-weight:700;font-size:18px;
+  padding:12px 20px;border-radius:14px;cursor:pointer;box-shadow:0 4px 10px var(--shadow);
+}
+.g4-chip:active{transform:translateY(2px);}
+.g4-chip.shake{animation:g4shake .35s ease;}
+@keyframes g4shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+
+/* ---------- accesibilidad / responsive ---------- */
+@media (prefers-reduced-motion: reduce){ *{animation:none!important;} }
+@media (max-width:480px){
+  .g2-grid{grid-template-columns:repeat(3,1fr);}
+  .profile-card{padding:14px 16px;}
+}
+</style>
+</head>
+<body>
+
+  <!-- ===================== DASHBOARD ===================== -->
+  <div id="viewDashboard">
+    <div class="top-bar">
+      <h1 class="fd">🌳 Bosque Fonológico</h1>
+    </div>
+
+    <section class="profile-card">
+      <div class="profile-avatar" id="profileAvatar">🦊</div>
+      <div class="profile-info">
+        <div class="name" id="profileName">Explorador</div>
+        <div class="sub" id="profileSub">6 años</div>
+        <div class="profile-stars" id="profileStars">⭐ 0 / 12 estrellas</div>
+      </div>
+      <button class="edit-btn" id="editProfileBtn" aria-label="Editar perfil">✏️</button>
+    </section>
+
+    <main class="game-grid" id="gameGrid"></main>
+  </div>
+
+  <!-- ===================== MODAL PERFIL ===================== -->
+  <div class="modal-veil" id="profileModal" hidden>
+    <div class="modal-card">
+      <h2>Editar mi perfil</h2>
+      <div class="field">
+        <label for="nameInput">Mi nombre</label>
+        <input type="text" id="nameInput" maxlength="20" placeholder="Escribe tu nombre">
+      </div>
+      <div class="field">
+        <label for="ageInput">Mi edad</label>
+        <select id="ageInput">
+          <option value="4">4 años</option>
+          <option value="5">5 años</option>
+          <option value="6">6 años</option>
+          <option value="7">7 años</option>
+          <option value="8">8 años</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Mi personaje</label>
+        <div class="avatar-grid" id="avatarGrid"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn outline" id="cancelProfileBtn">Cancelar</button>
+        <button class="btn" id="saveProfileBtn">Guardar</button>
+      </div>
+      <button class="reset-link" id="resetProgressBtn">Borrar mi progreso guardado</button>
+    </div>
+  </div>
+
+  <!-- ===================== PANTALLA DE JUEGO ===================== -->
+  <div class="game-screen" id="gameScreen" hidden>
+    <div class="game-topbar">
+      <button class="back-btn" id="backBtn">← Volver</button>
+      <div class="game-hud" id="gameHud"></div>
+    </div>
+    <div class="game-body" id="gameBody"></div>
+  </div>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ============================================================
+     UTILIDADES COMPARTIDAS
+     ============================================================ */
+  const $ = (sel, root = document) => root.querySelector(sel);
+  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+  const rand = (n) => Math.floor(Math.random() * n);
+  const pick = (arr) => arr[rand(arr.length)];
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) { const j = rand(i + 1); [a[i], a[j]] = [a[j], a[i]]; }
+    return a;
+  }
+
+  let spanishVoice = null;
+  function pickVoice() {
+    if (!window.speechSynthesis) return null;
+    const voices = window.speechSynthesis.getVoices();
+    return voices.find(v => /es-PE/i.test(v.lang)) || voices.find(v => /^es/i.test(v.lang)) || voices[0] || null;
+  }
+  if (window.speechSynthesis) {
+    spanishVoice = pickVoice();
+    window.speechSynthesis.onvoiceschanged = () => { spanishVoice = pickVoice(); };
+  }
+  function say(text, rate = 1) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'es-PE'; u.rate = rate; u.pitch = 1.05;
+    if (spanishVoice) u.voice = spanishVoice;
+    window.speechSynthesis.speak(u);
+  }
+
+  let audioCtx = null;
+  function ctx() {
+    if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  function tone(freq, dur, type = 'sine', delay = 0, peak = 0.18) {
+    const c = ctx(); if (!c) return;
+    const osc = c.createOscillator(), gain = c.createGain();
+    osc.type = type; osc.frequency.value = freq;
+    const t0 = c.currentTime + delay;
+    gain.gain.setValueAtTime(0, t0);
+    gain.gain.linearRampToValueAtTime(peak, t0 + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+    osc.connect(gain).connect(c.destination);
+    osc.start(t0); osc.stop(t0 + dur + 0.02);
+  }
+  const chimeGood = () => { tone(523.25, .15, 'sine', 0); tone(659.25, .17, 'sine', .09); tone(784, .2, 'sine', .18); };
+  const chimeBad = () => { tone(220, .2, 'sawtooth', 0, .12); tone(196, .24, 'sawtooth', .08, .1); };
+  const chimeWin = () => { tone(523, .16, 'sine', 0); tone(659, .16, 'sine', .12); tone(784, .16, 'sine', .24); tone(1046, .3, 'sine', .36); };
+
+  const CONFETTI_COLORS = ['#4E9F63', '#FFC145', '#FF6F5E', '#8ECDDD', '#9BD6A4'];
+  function confetti(count = 34) {
+    for (let i = 0; i < count; i++) {
+      const el = document.createElement('div');
+      el.style.cssText = `position:fixed;top:-20px;left:${rand(100)}vw;width:10px;height:14px;z-index:999;
+        pointer-events:none;border-radius:${Math.random() > .5 ? '50%' : '2px'};
+        background:${pick(CONFETTI_COLORS)};animation:confettiFall ${1.6 + Math.random() * 1.2}s cubic-bezier(.4,0,.6,1) forwards;
+        animation-delay:${Math.random() * .4}s;`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 3200);
+    }
+  }
+  const styleSheet = document.createElement('style');
+  styleSheet.textContent = `@keyframes confettiFall{from{transform:translateY(0) rotate(0);opacity:1;}to{transform:translateY(110vh) rotate(540deg);opacity:.9;}}`;
+  document.head.appendChild(styleSheet);
+
+  /* ============================================================
+     PERFIL Y PROGRESO (localStorage)
+     ============================================================ */
+  const PROFILE_KEY = 'fono_profile';
+  const PROGRESS_KEY = 'fono_progress';
+  const AVATARS = ['🦊','🐰','🐼','🦁','🐸','🦉','🐨','🐯'];
+
+  function loadProfile() {
+    try { return { name: 'Explorador', avatar: '🦊', age: 6, ...JSON.parse(localStorage.getItem(PROFILE_KEY)) }; }
+    catch { return { name: 'Explorador', avatar: '🦊', age: 6 }; }
+  }
+  function saveProfile(p) { localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); }
+
+  function loadProgress() {
+    try { return JSON.parse(localStorage.getItem(PROGRESS_KEY)) || {}; } catch { return {}; }
+  }
+  function recordResult(gameId, stars, extra = {}) {
+    const progress = loadProgress();
+    const prev = progress[gameId] || { stars: 0, plays: 0 };
+    progress[gameId] = { stars: Math.max(stars, prev.stars), plays: prev.plays + 1, ...extra };
+    localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
+    return progress[gameId];
+  }
+  function getResult(gameId) { return loadProgress()[gameId] || null; }
+
+  /* ============================================================
+     CATÁLOGO DE JUEGOS
+     ============================================================ */
+  const GAMES = [
+    { id: 'atrapaSonido', title: 'Atrapa el Sonido', emoji: '🎯', desc: 'Atrapa palabras que empiezan con el sonido indicado.' },
+    { id: 'memoriaSonidos', title: 'Memoria de Sonidos', emoji: '🧠', desc: 'Encuentra las parejas escuchando cada palabra.' },
+    { id: 'cualEscuchaste', title: '¿Cuál Escuchaste?', emoji: '👂', desc: 'Escucha la palabra y toca el dibujo correcto.' },
+    { id: 'silabasSaltarinas', title: 'Sílabas Saltarinas', emoji: '🐸', desc: 'Une las sílabas en orden para formar la palabra.' }
+  ];
+
+  const BANK = [
+    { word: 'mano', emoji: '✋' }, { word: 'mesa', emoji: '🪑' }, { word: 'manzana', emoji: '🍎' },
+    { word: 'sol', emoji: '☀️' }, { word: 'sapo', emoji: '🐸' }, { word: 'serpiente', emoji: '🐍' },
+    { word: 'taza', emoji: '☕' }, { word: 'tigre', emoji: '🐯' }, { word: 'tomate', emoji: '🍅' },
+    { word: 'luna', emoji: '🌙' }, { word: 'león', emoji: '🦁' }, { word: 'limón', emoji: '🍋' },
+    { word: 'gato', emoji: '🐱' }, { word: 'globo', emoji: '🎈' }, { word: 'pan', emoji: '🍞' },
+    { word: 'pez', emoji: '🐟' }, { word: 'oso', emoji: '🐻' }, { word: 'flor', emoji: '🌸' }
+  ];
+  const SYLLABLE_WORDS = [
+    { word: 'mano', syll: ['ma', 'no'], emoji: '✋' },
+    { word: 'sapo', syll: ['sa', 'po'], emoji: '🐸' },
+    { word: 'taza', syll: ['ta', 'za'], emoji: '☕' },
+    { word: 'luna', syll: ['lu', 'na'], emoji: '🌙' },
+    { word: 'gato', syll: ['ga', 'to'], emoji: '🐱' },
+    { word: 'oso', syll: ['o', 'so'], emoji: '🐻' },
+    { word: 'globo', syll: ['glo', 'bo'], emoji: '🎈' },
+    { word: 'limón', syll: ['li', 'món'], emoji: '🍋' }
+  ];
+
+  /* ============================================================
+     RENDER: DASHBOARD Y PERFIL
+     ============================================================ */
+  const profileAvatarEl = $('#profileAvatar');
+  const profileNameEl = $('#profileName');
+  const profileSubEl = $('#profileSub');
+  const profileStarsEl = $('#profileStars');
+  const gameGridEl = $('#gameGrid');
+
+  function totalStars() {
+    const p = loadProgress();
+    return GAMES.reduce((sum, g) => sum + ((p[g.id] && p[g.id].stars) || 0), 0);
+  }
+
+  function renderDashboard() {
+    const profile = loadProfile();
+    profileAvatarEl.textContent = profile.avatar;
+    profileNameEl.textContent = profile.name || 'Explorador';
+    profileSubEl.textContent = `${profile.age} años`;
+    profileStarsEl.textContent = `⭐ ${totalStars()} / ${GAMES.length * 3} estrellas`;
+
+    gameGridEl.innerHTML = '';
+    GAMES.forEach(g => {
+      const result = getResult(g.id);
+      const stars = result ? result.stars : 0;
+      const card = document.createElement('button');
+      card.className = 'game-card';
+      card.innerHTML = `
+        <div class="game-emoji">${g.emoji}</div>
+        <h2>${g.title}</h2>
+        <p class="desc">${g.desc}</p>
+        <div class="game-stars">${'⭐'.repeat(stars)}${'☆'.repeat(3 - stars)}</div>
+        <div class="game-plays">${result ? `Jugado ${result.plays} ${result.plays === 1 ? 'vez' : 'veces'}` : 'Aún no jugado'}</div>
+      `;
+      card.addEventListener('click', () => openGame(g.id));
+      gameGridEl.appendChild(card);
+    });
+  }
+
+  /* ---------- modal de edición de perfil ---------- */
+  const profileModal = $('#profileModal');
+  const avatarGrid = $('#avatarGrid');
+  const nameInput = $('#nameInput');
+  const ageInput = $('#ageInput');
+  let selectedAvatar = '🦊';
+
+  function openProfileModal() {
+    const profile = loadProfile();
+    nameInput.value = profile.name || '';
+    ageInput.value = String(profile.age || 6);
+    selectedAvatar = profile.avatar || '🦊';
+    avatarGrid.innerHTML = '';
+    AVATARS.forEach(av => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'avatar-opt' + (av === selectedAvatar ? ' selected' : '');
+      b.textContent = av; b.setAttribute('aria-label', 'Elegir personaje ' + av);
+      b.addEventListener('click', () => {
+        selectedAvatar = av;
+        $$('.avatar-opt', avatarGrid).forEach(el => el.classList.remove('selected'));
+        b.classList.add('selected');
+      });
+      avatarGrid.appendChild(b);
+    });
+    profileModal.hidden = false;
+    nameInput.focus();
+  }
+  function closeProfileModal() { profileModal.hidden = true; }
+
+  $('#editProfileBtn').addEventListener('click', openProfileModal);
+  $('#cancelProfileBtn').addEventListener('click', closeProfileModal);
+  profileModal.addEventListener('click', (e) => { if (e.target === profileModal) closeProfileModal(); });
+
+  $('#saveProfileBtn').addEventListener('click', () => {
+    const name = nameInput.value.trim().slice(0, 20) || 'Explorador';
+    const age = parseInt(ageInput.value, 10) || 6;
+    saveProfile({ name, avatar: selectedAvatar, age });
+    closeProfileModal();
+    renderDashboard();
+    say(`¡Hola, ${name}!`);
+  });
+
+  $('#resetProgressBtn').addEventListener('click', () => {
+    if (confirm('¿Seguro que quieres borrar todo tu progreso guardado? Esta acción no se puede deshacer.')) {
+      localStorage.removeItem(PROGRESS_KEY);
+      closeProfileModal();
+      renderDashboard();
+    }
+  });
+
+  /* ============================================================
+     MOTOR DE PANTALLA DE JUEGO
+     ============================================================ */
+  const gameScreen = $('#gameScreen');
+  const gameBody = $('#gameBody');
+  const gameHud = $('#gameHud');
+  let currentCleanup = null;
+
+  function openGame(id) {
+    document.getElementById('viewDashboard').style.display = 'none';
+    gameScreen.hidden = false;
+    gameHud.innerHTML = '';
+    gameBody.innerHTML = '';
+    const runner = GAME_RUNNERS[id];
+    if (runner) currentCleanup = runner();
+  }
+  function closeGame() {
+    if (typeof currentCleanup === 'function') currentCleanup();
+    currentCleanup = null;
+    window.speechSynthesis && window.speechSynthesis.cancel();
+    gameScreen.hidden = true;
+    document.getElementById('viewDashboard').style.display = '';
+    renderDashboard();
+  }
+  $('#backBtn').addEventListener('click', closeGame);
+
+  function showResult(gameId, stars, message) {
+    gameHud.innerHTML = '';
+    gameBody.innerHTML = `
+      <div class="result-wrap">
+        <div class="result-card">
+          <div class="result-emoji">${stars >= 3 ? '🏆' : stars > 0 ? '🎉' : '💧'}</div>
+          <h2>${stars > 0 ? '¡Muy bien!' : '¡Casi lo logras!'}</h2>
+          <div class="result-stars">${'⭐'.repeat(stars)}${'☆'.repeat(3 - stars)}</div>
+          <p>${message}</p>
+          <div class="result-actions">
+            <button class="btn" id="playAgainBtn">Jugar de nuevo 🔄</button>
+            <button class="btn outline" id="toDashboardBtn">Volver al panel 🌳</button>
+          </div>
+        </div>
+      </div>`;
+    if (stars > 0) { confetti(); chimeWin(); } else { chimeBad(); }
+    say(message);
+    $('#playAgainBtn').addEventListener('click', () => openGame(gameId));
+    $('#toDashboardBtn').addEventListener('click', closeGame);
+  }
+
+  /* ============================================================
+     JUEGO 1 — Atrapa el Sonido
+     ============================================================ */
+  function runAtrapaSonido() {
+    const letters = ['m', 's', 't', 'l'];
+    const targetLetter = pick(letters);
+    const correctPool = BANK.filter(w => w.word[0] === targetLetter);
+    const distractPool = BANK.filter(w => w.word[0] !== targetLetter);
+    const GOAL = 8, START_LIVES = 3, FALL_S = 4.2, SPAWN_MS = 1100;
+    let lives = START_LIVES, caught = 0, score = 0, running = true, spawnTimer = null;
+
+    gameHud.innerHTML = `
+      <div class="hud-chip" id="g1Lives">❤️❤️❤️</div>
+      <div class="hud-chip" id="g1Score">⭐ 0</div>`;
+    gameBody.innerHTML = `
+      <div class="g1-target">
+        <span class="letter">${targetLetter.toUpperCase()}</span>
+        <span class="example">${correctPool[0].word} ${correctPool[0].emoji}</span>
+      </div>
+      <div class="g1-area" id="g1Area"></div>`;
+    const area = $('#g1Area');
+    const livesEl = $('#g1Lives'), scoreEl = $('#g1Score');
+    const renderLives = () => livesEl.textContent = '❤️'.repeat(lives) + '🖤'.repeat(START_LIVES - lives);
+    say(`Atrapa las palabras que empiecen como ${correctPool[0].word}.`);
+
+    function spawn() {
+      if (!running) return;
+      const isGood = Math.random() < 0.55;
+      const item = isGood ? pick(correctPool) : pick(distractPool);
+      const btn = document.createElement('button');
+      btn.className = 'g1-item'; btn.textContent = item.emoji;
+      btn.style.left = (5 + Math.random() * 80) + '%';
+      btn.style.animationDuration = FALL_S + 's';
+      let resolved = false;
+      btn.addEventListener('click', () => {
+        if (resolved) return; resolved = true;
+        say(item.word, 0.85);
+        const r = btn.getBoundingClientRect(), ar = area.getBoundingClientRect();
+        const fx = document.createElement('div');
+        fx.className = 'float-pts ' + (isGood ? 'good' : 'bad');
+        fx.textContent = isGood ? '+10' : 'Ups';
+        fx.style.left = (r.left - ar.left) + 'px'; fx.style.top = (r.top - ar.top) + 'px';
+        area.appendChild(fx); setTimeout(() => fx.remove(), 850);
+        if (isGood) {
+          btn.classList.add('good'); chimeGood(); score += 10; caught++;
+          scoreEl.textContent = '⭐ ' + score;
+          if (caught >= GOAL) { running = false; clearTimeout(spawnTimer); setTimeout(finish, 500); }
+        } else {
+          btn.classList.add('bad'); chimeBad(); lives--; renderLives();
+          if (lives <= 0) { running = false; clearTimeout(spawnTimer); setTimeout(finish, 500); }
+        }
+        setTimeout(() => btn.remove(), 400);
+      });
+      btn.addEventListener('animationend', () => { if (!resolved) { resolved = true; btn.remove(); } });
+      area.appendChild(btn);
+    }
+    function loop() { if (!running) return; spawn(); spawnTimer = setTimeout(loop, SPAWN_MS); }
+    function finish() {
+      const stars = caught >= GOAL ? lives : 0;
+      recordResult('atrapaSonido', stars, { bestScore: score });
+      showResult('atrapaSonido', stars, caught >= GOAL
+        ? `Atrapaste ${GOAL} palabras con el sonido /${targetLetter}/.`
+        : 'Se acabaron las vidas. ¡Puedes volver a intentarlo!');
+    }
+    renderLives(); loop();
+    return () => { running = false; clearTimeout(spawnTimer); };
+  }
+
+  /* ============================================================
+     JUEGO 2 — Memoria de Sonidos
+     ============================================================ */
+  function runMemoriaSonidos() {
+    const PAIRS = 6;
+    const words = shuffle(BANK).slice(0, PAIRS);
+    const cards = shuffle(words.concat(words).map((w, i) => ({ ...w, uid: i })));
+    let flipped = [], matched = 0, moves = 0, locked = false;
+
+    gameHud.innerHTML = `<div class="hud-chip" id="g2Moves">Intentos: 0</div>`;
+    gameBody.innerHTML = `<div class="g2-grid" id="g2Grid"></div>`;
+    const grid = $('#g2Grid');
+    const movesEl = $('#g2Moves');
+    say('Encuentra las parejas. Toca una tarjeta para escuchar la palabra.');
+
+    cards.forEach((c) => {
+      const card = document.createElement('button');
+      card.className = 'g2-card';
+      card.innerHTML = `<div class="face back">🌿</div><div class="face front">${c.emoji}</div>`;
+      card.addEventListener('click', () => onFlip(card, c));
+      grid.appendChild(card);
+    });
+
+    function onFlip(card, data) {
+      if (locked || card.classList.contains('flipped') || card.classList.contains('matched')) return;
+      card.classList.add('flipped');
+      say(data.word, 0.9);
+      flipped.push({ card, data });
+      if (flipped.length === 2) {
+        moves++; movesEl.textContent = 'Intentos: ' + moves;
+        locked = true;
+        const [a, b] = flipped;
+        if (a.data.word === b.data.word) {
+          chimeGood();
+          setTimeout(() => {
+            a.card.classList.add('matched'); b.card.classList.add('matched');
+            flipped = []; locked = false; matched++;
+            if (matched === PAIRS) setTimeout(finish, 400);
+          }, 350);
+        } else {
+          chimeBad();
+          setTimeout(() => {
+            a.card.classList.remove('flipped'); b.card.classList.remove('flipped');
+            flipped = []; locked = false;
+          }, 700);
+        }
+      }
+    }
+    function finish() {
+      const stars = moves <= PAIRS * 1.4 ? 3 : moves <= PAIRS * 2.2 ? 2 : 1;
+      recordResult('memoriaSonidos', stars, { bestScore: moves });
+      showResult('memoriaSonidos', stars, `Completaste el juego en ${moves} intentos.`);
+    }
+    return () => {};
+  }
+
+  /* ============================================================
+     JUEGO 3 — ¿Cuál Escuchaste?
+     ============================================================ */
+  function runCualEscuchaste() {
+    const ROUNDS = 6;
+    let round = 0, correct = 0, locked = false;
+
+    gameHud.innerHTML = `<div class="hud-chip" id="g3Round">Ronda 1/${ROUNDS}</div>`;
+    gameBody.innerHTML = `<div class="g3-wrap"><button class="g3-listen-btn" id="g3Listen">🔊</button><div class="g3-options" id="g3Options"></div></div>`;
+    const roundEl = $('#g3Round'), listenBtn = $('#g3Listen'), optsEl = $('#g3Options');
+    say('Escucha la palabra y toca el dibujo correcto.');
+
+    let target = null;
+    function nextRound() {
+      if (round >= ROUNDS) return finish();
+      locked = false;
+      roundEl.textContent = `Ronda ${round + 1}/${ROUNDS}`;
+      const opts = shuffle(BANK).slice(0, 3);
+      target = pick(opts);
+      shuffle(opts);
+      optsEl.innerHTML = '';
+      opts.forEach(o => {
+        const b = document.createElement('button');
+        b.className = 'g3-opt'; b.textContent = o.emoji;
+        b.setAttribute('aria-label', o.word);
+        b.addEventListener('click', () => onPick(b, o));
+        optsEl.appendChild(b);
+      });
+      setTimeout(() => say(target.word, 0.85), 300);
+    }
+    listenBtn.addEventListener('click', () => target && say(target.word, 0.85));
+
+    function onPick(btn, opt) {
+      if (locked) return; locked = true;
+      const isCorrect = opt.word === target.word;
+      btn.classList.add(isCorrect ? 'correct' : 'wrong');
+      if (isCorrect) { correct++; chimeGood(); } else { chimeBad(); }
+      round++;
+      setTimeout(nextRound, 700);
+    }
+    function finish() {
+      const stars = correct >= ROUNDS - 1 ? 3 : correct >= ROUNDS - 3 ? 2 : 1;
+      recordResult('cualEscuchaste', stars, { bestScore: correct });
+      showResult('cualEscuchaste', stars, `Acertaste ${correct} de ${ROUNDS} palabras.`);
+    }
+    nextRound();
+    return () => {};
+  }
+
+  /* ============================================================
+     JUEGO 4 — Sílabas Saltarinas
+     ============================================================ */
+  function runSilabasSaltarinas() {
+    const ROUNDS = 6;
+    let round = 0, mistakes = 0;
+    const sequence = shuffle(SYLLABLE_WORDS).slice(0, ROUNDS);
+
+    gameHud.innerHTML = `<div class="hud-chip" id="g4Round">Palabra 1/${ROUNDS}</div>`;
+    gameBody.innerHTML = `<div class="g4-wrap"><div class="g4-emoji" id="g4Emoji"></div><div class="g4-slots" id="g4Slots"></div><div class="g4-chips" id="g4Chips"></div></div>`;
+    const roundEl = $('#g4Round'), emojiEl = $('#g4Emoji'), slotsEl = $('#g4Slots'), chipsEl = $('#g4Chips');
+    say('Une las sílabas en orden para formar la palabra.');
+
+    let current = null, nextIndex = 0;
+    function loadRound() {
+      if (round >= ROUNDS) return finish();
+      current = sequence[round]; nextIndex = 0;
+      roundEl.textContent = `Palabra ${round + 1}/${ROUNDS}`;
+      emojiEl.textContent = current.emoji;
+      slotsEl.innerHTML = current.syll.map(() => `<div class="g4-slot"></div>`).join('');
+      chipsEl.innerHTML = '';
+      shuffle(current.syll).forEach(s => {
+        const b = document.createElement('button');
+        b.className = 'g4-chip'; b.textContent = s;
+        b.addEventListener('click', () => onChip(b, s));
+        chipsEl.appendChild(b);
+      });
+      setTimeout(() => say(current.word, 0.85), 250);
+    }
+    function onChip(btn, syll) {
+      if (btn.disabled) return;
+      if (syll === current.syll[nextIndex]) {
+        const slot = $$('.g4-slot', slotsEl)[nextIndex];
+        slot.textContent = syll; chimeGood();
+        btn.disabled = true; btn.style.visibility = 'hidden';
+        nextIndex++;
+        if (nextIndex === current.syll.length) {
+          say(current.word, 0.9);
+          setTimeout(() => { round++; loadRound(); }, 700);
+        }
+      } else {
+        mistakes++; chimeBad();
+        btn.classList.add('shake');
+        setTimeout(() => btn.classList.remove('shake'), 350);
+      }
+    }
+    function finish() {
+      const stars = mistakes === 0 ? 3 : mistakes <= 3 ? 2 : 1;
+      recordResult('silabasSaltarinas', stars, { bestScore: mistakes });
+      showResult('silabasSaltarinas', stars, `Formaste ${ROUNDS} palabras con ${mistakes} ${mistakes === 1 ? 'error' : 'errores'}.`);
+    }
+    loadRound();
+    return () => {};
+  }
+
+  const GAME_RUNNERS = {
+    atrapaSonido: runAtrapaSonido,
+    memoriaSonidos: runMemoriaSonidos,
+    cualEscuchaste: runCualEscuchaste,
+    silabasSaltarinas: runSilabasSaltarinas
+  };
+
+  /* ============================================================
+     INICIO
+     ============================================================ */
+  renderDashboard();
+})();
+</script>
+</body>
+</html>
